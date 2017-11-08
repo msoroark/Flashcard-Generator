@@ -12,24 +12,30 @@ var inquirer = require("inquirer");
 var basicCards = [];
 var clozeCards = [];
 
+
+
 //Prompt for Cloze or Basic
 var chooseCard = function() {
     inquirer.prompt([{
             name: 'Card',
-            message: 'Please enter the card type you would like to build',
+            message: 'Please enter what you would like to do: ',
             type: 'list',
             choices: [{
-                name: 'Basic'
+                name: 'Create Basic Flash Card'
             }, {
-                name: 'Cloze'
+                name: 'Create Basic Cloze Card'
+            }, {
+                name: 'Review Current Cards'
             }]
         }])
         .then(function(answers) {
 
-            if (answers.Card === 'Basic') {
+            if (answers.Card === 'Create Basic Flash Card') {
                 addBasic();
-            } else if (answers.Card === 'Cloze') {
+            } else if (answers.Card === 'Create Basic Cloze Card') {
                 addCloze();
+            } else if (answers.Card === 'Review Current Cards') {
+                review();
             }
         });
 
@@ -73,23 +79,23 @@ var addCloze = function() {
         }, {
             name: 'cloze',
             message: 'What is the cloze portion?',
-    }])
-    .then(function(answers) {
-    
-    //Hold new clozecard constructor
-    var newCard = new ClozeCard(answers.text, answers.cloze);
+        }])
+        .then(function(answers) {
 
-    //push to cloze card array. 
-    clozeCards.push(newCard);
+            //Hold new clozecard constructor
+            var newCard = new ClozeCard(answers.text, answers.cloze);
 
-    console.log("\nCloze card created \nComplete Question: " + answers.text
-				+ "\nCloze portion: " + answers.cloze);
+            //push to cloze card array. 
+            clozeCards.push(newCard);
 
-    console.log(clozeCards);
-    
-    whatsNext();
+            console.log("\nCloze card created \nComplete Question: " + answers.text +
+                "\nCloze portion: " + answers.cloze);
 
-});
+            console.log(clozeCards);
+
+            whatsNext();
+
+        });
 }
 
 //Prompt for next task, either review cards or add another. 
@@ -115,4 +121,74 @@ var whatsNext = function() {
         });
 }
 
+
+//Function for looking at completed Cards
+var review = function() {
+    inquirer.prompt([{
+            name: 'reviewWhat',
+            message: 'Which cards would you like to review?',
+            type: 'list',
+            choices: [{
+                name: 'Basic Cards',
+            }, {
+                name: 'Cloze Cards'
+            }]
+        }])
+        .then(function(answers) {
+            if (answers.reviewWhat === 'Basic Cards') {
+                showCardBasic();
+            }
+        })
+
+}
+
+var showCardBasic = function() {
+	//Loop through array
+    for (i = 0; i < basicCards.length; i++) {
+
+        //Putting the front and back into  variables.
+        var question = basicCards[i].front;
+        var correct = basicCards[i].back;
+
+        console.log(question);
+        console.log(correct);
+        //Prompt user for the answer. 
+        inquirer.prompt([{
+                name: "answer",
+                message: question,
+            }])
+            .then(function(answer) {
+                if (answer.answer === correct) {
+                    console.log("Correct! Great Job!");
+                    showCardBasic();
+
+                } else {
+                    inquirer.prompt([{
+                            name: 'incorrect',
+                            message: 'Would you like to...',
+                            type: 'list',
+                            choices: [{
+                                name: 'Try Again'
+                            }, {
+                                name: 'New Card'
+                            }, {
+                                name: 'Show Answer'
+                            }]
+
+                        }])
+                        .then(function(answer) {
+
+                        });
+                }
+            })
+    }
+}
+
 chooseCard();
+
+
+var firstPresident = new BasicCard("Who was the first president of the United States?", "George Washington");
+var firstPresidentCloze = new ClozeCard("George Washington was the first president of the United States.", "George Washington");
+
+basicCards.push(firstPresident);
+clozeCards.push(firstPresidentCloze);
